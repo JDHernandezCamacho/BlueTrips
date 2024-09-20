@@ -192,11 +192,6 @@ Este dashboard contiene información de vehículos eléctricos como: marca, mode
 - Diego Camacho - Data Analyst
 
 
-- **Arquitectura del proyecto**
-## **Arquitectura del proyecto**
-<p align="center">
-<img src="gráficos/Arquitectura Tecnológica UrbaGreen.png"  height=300>
-</p>
 
 - **Cronograma general del proyecto (Gantt):**
 <p align="center">
