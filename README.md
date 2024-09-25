@@ -203,7 +203,7 @@ Este dashboard contiene información de vehículos eléctricos como: marca, mode
         <a href="https://github.com/JPjuanaponte" target="_blank">
           <img style='width:8rem' src="https://img.shields.io/static/v1?style=for-the-badge&message=GitHub&color=172B4D&logo=GitHub&logoColor=FFFFFF&label="/>
         </a>
-        <a href="https://www.linkedin.com/in/allan-alvarez-gonzalez-6783a2256/" target="_blank">
+        <a href="https://www.linkedin.com/in/juan-pablo-aponte-murcia-36603627a/" target="_blank">
           <img style='width:8rem' src="https://img.shields.io/badge/linkedin%20-%230077B5.svg?&style=for-the-badge&logo=linkedin&logoColor=white"/>
         </a>
         </div>
