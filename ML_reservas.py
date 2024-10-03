@@ -2,12 +2,14 @@ import streamlit as st
 import pandas as pd
 import random
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+
+url = 'https://github.com/UrbanGreenSolutions/BlueTrips/blob/main/Datasets/complete_with_cars.csv'
 
 # Cargar los datos
 @st.cache_data
 def load_data():
-    return pd.read_csv("Datasets\complete_with_placas.csv")
+    return pd.read_csv(url)
 
 complete = load_data()
 
@@ -28,8 +30,8 @@ X_train, X_test, y_train_costo, y_test_costo = train_test_split(X, y_costo, test
 X_train_tiempo, X_test_tiempo, y_train_tiempo, y_test_tiempo = train_test_split(X, y_tiempo, test_size=0.2, random_state=42)
 
 # Entrenar los modelos
-modelo_costo = LinearRegression().fit(X_train, y_train_costo)
-modelo_tiempo = LinearRegression().fit(X_train_tiempo, y_train_tiempo)
+modelo_costo = DecisionTreeRegressor().fit(X_train, y_train_costo)
+modelo_tiempo = DecisionTreeRegressor().fit(X_train_tiempo, y_train_tiempo)
 
 # Crear el DataFrame de reservas
 reservas = pd.DataFrame(columns=['nombre_cliente', 'apellido_cliente', 'fecha_servicio', 'hora_servicio', 
@@ -37,7 +39,7 @@ reservas = pd.DataFrame(columns=['nombre_cliente', 'apellido_cliente', 'fecha_se
 
 # Cargar reservas desde un archivo CSV si existe
 try:
-    reservas = pd.read_csv('Datasets\reservas.csv')
+    reservas = pd.read_csv('reservas.csv')
 except FileNotFoundError:
     pass  # Si no existe el archivo, continuar con el DataFrame vacío
 
@@ -64,7 +66,8 @@ aeropuerto_opciones = {
 }
 aeropuerto_llegada = st.selectbox("Seleccione el aeropuerto de llegada:", list(aeropuerto_opciones.keys()))
 
-zona_destino = st.text_input("Ingrese la zona o localidad de destino:")
+zona_destino = st.selectbox("Ingrese la zona o localidad de destino:", complete['Zone'].unique())
+
 num_pasajeros = st.number_input("Ingrese la cantidad de pasajeros (máx 5):", min_value=1, max_value=5)
 
 # Asegurarse de que no haya valores NaN en la columna 'Zone'
@@ -158,7 +161,7 @@ if st.button("Reservar"):
         reservas = pd.concat([reservas, nueva_reserva], ignore_index=True)
 
         # Guardar reservas en un archivo CSV
-        reservas.to_csv('Datasets\reservas.csv', index=False)
+        reservas.to_csv('reservas.csv', index=False)
 
         st.success(mensaje)
 
