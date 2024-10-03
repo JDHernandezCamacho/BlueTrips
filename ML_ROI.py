@@ -14,12 +14,12 @@ euro_to_usd = 1.10
 # Título de la app
 st.title("Análisis de ROI para vehículos eléctricos compartidos")
 
-url = 'https://github.com/UrbanGreenSolutions/BlueTrips/blob/main/Datasets/complete_with_cars.csv'
 
 # Cargar el dataset 'complete_with_cars.csv'
 @st.cache_data
 def load_data():
-    return pd.read_csv(url)
+    return pd.read_csv("Datasets\complete_with_cars.csv")
+
 
 complete_with_cars = load_data() 
 

@@ -4,12 +4,10 @@ import random
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
 
-url = 'https://github.com/UrbanGreenSolutions/BlueTrips/blob/main/Datasets/complete_with_placas.csv'
-
 # Cargar los datos
 @st.cache_data
 def load_data():
-    return pd.read_csv(url)
+    return pd.read_csv("Datasets\complete_with_placas.csv")
 
 complete = load_data()
 
