@@ -1,0 +1,17 @@
+nombre_cliente,apellido_cliente,fecha_servicio,hora_servicio,aeropuerto_llegada,zona_destino,num_pasajeros,placa,confirmacion
+juan,aponte,2024-09-23,15:15:00,jfk,manhattan,1,abd_4515,985
+juan,aponte,2024-09-23,21:00:00,jfk,manhattan,1,abd_4515,940
+juan,aponte,2024-09-23,21:00:00,newark,manhattan,1,abd_4515,457
+juan,aponte,2024-09-23,21:00:00,newark,manhattan,1,abd_4515,840
+juan,aponte,2024-09-23,21:00:00,newark,amaica Bay,1,jdh_2301,791
+juan,aponte,2024-09-23,21:00:00,jfk,SoHo,1,bgh_7445,116
+juan,aponte,2024-09-23,21:00:00,la guardia,Financial District South,1,ckh_4522,843
+mateo,aponte,2024-09-23,18:00:00,la guardia,Astoria Park,2,abd_4512,38
+juan,aponte,2024-09-24,13:30:00,la guardia,amaica Bay,2,jdh_2301,7
+Diego,Hernandez,2024-09-24,20:00:00,jfk,Central Park,2,abd_4513,220
+juan,aponte,25 septiembre del 2024,23:00,jfk,manhattan,2,nkp_1121,39
+juan,aponte,2024-09-30,21:15:00,JFK,bronx,2,pqs_7412,448
+juan,aponte,2024-09-30,21:15:00,JFK,bronx,2,pqs_7412,102
+Angela ,Aguirre,2024-10-02,20:30:00,JFK,SoHo,2,crh_1445,62
+juan,pablo,2024-10-01,20:00:00,La Guardia,SoHo,2,crh_1445,688
+Facu,Dispenza,2024-10-03,19:00:00,La Guardia,SoHo,2,crh_1445,601
