@@ -4,7 +4,7 @@ import random
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
 
-url = 'https://github.com/UrbanGreenSolutions/BlueTrips/blob/main/Datasets/complete_with_cars.csv'
+url = 'https://github.com/UrbanGreenSolutions/BlueTrips/blob/main/Datasets/complete_with_placas.csv'
 
 # Cargar los datos
 @st.cache_data

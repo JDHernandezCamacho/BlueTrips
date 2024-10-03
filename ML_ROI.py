@@ -4,6 +4,9 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
+import joblib
+
+
 
 # Tasa de conversión de euros a dólares (puedes actualizar este valor con la tasa del día)
 euro_to_usd = 1.10
@@ -11,10 +14,12 @@ euro_to_usd = 1.10
 # Título de la app
 st.title("Análisis de ROI para vehículos eléctricos compartidos")
 
+url = 'https://github.com/UrbanGreenSolutions/BlueTrips/blob/main/Datasets/complete_with_cars.csv'
+
 # Cargar el dataset 'complete_with_cars.csv'
 @st.cache_data
 def load_data():
-    return pd.read_csv("Datasets\complete_with_cars.csv")
+    return pd.read_csv(url)
 
 complete_with_cars = load_data() 
 
@@ -139,4 +144,3 @@ else:
     st.write(f"Con estos datos, hemos proyectado que recuperarás tu inversión en un plazo de **{payback_period_months:.0f} meses**.")
     st.write(f"A lo largo de este período, generarás un retorno del **{roi_percentage:.2f}%** sobre tu inversión inicial.")
     st.write("Esto indica que tu proyecto no solo es viable, sino que también será altamente rentable en un plazo razonable.")
-
