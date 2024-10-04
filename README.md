@@ -28,7 +28,7 @@
 <div>
     <div align='center'>
     <a href="https://bluetrips-digiruzvrwgjk5daajlc9s.streamlit.app/" target="_blank" target="_blank">
-          <img  src="C:\Users\cgabr\OneDrive\Desktop"/>
+          <img  src="https://i.ibb.co/g7Fq0nX/Whats-App-Image-2024-10-04-at-4-56-45-PM.jpg"/>
        </a>
     </div>
 </div>
