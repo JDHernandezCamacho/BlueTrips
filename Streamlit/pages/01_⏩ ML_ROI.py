@@ -12,7 +12,7 @@ st.title("Análisis de ROI para vehículos eléctricos compartidos")
 
 # Autenticación con BigQuery
 credentials = service_account.Credentials.from_service_account_file(
-    '.../Datasets/nomadic-mesh-436922-r3.json'
+    'C:\\Users\\Juan Pablo\\Desktop\\proyecto final Henry\\nomadic-mesh-436922-r3-e78534bb2f77.json'
 )
 
 # Crear cliente BigQuery
@@ -27,10 +27,8 @@ def load_data_from_bigquery():
     df = client.query(query).to_dataframe()
     return df
 
-# Título de la app
-st.title("Análisis de ROI para vehículos eléctricos compartidos")
-
-complete_with_cars = load_data_from_bigquery() 
+# Cargar datos y realizar preprocesamiento
+complete_with_cars = load_data_from_bigquery()
 
 # Eliminar vehículos duplicados por 'Brand', 'Model' y 'Range_Km'
 complete_with_cars = complete_with_cars.drop_duplicates(subset=['Brand', 'Model', 'Range_Km'])

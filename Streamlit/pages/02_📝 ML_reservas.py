@@ -2,14 +2,28 @@ import streamlit as st
 import pandas as pd
 import random
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from google.cloud import bigquery
+from google.oauth2 import service_account
 
-# Cargar los datos
+# Autenticación con BigQuery
+credentials = service_account.Credentials.from_service_account_file(
+    'C:\\Users\\Juan Pablo\\Desktop\\proyecto final Henry\\nomadic-mesh-436922-r3-e78534bb2f77.json'
+)
+
+# Crear cliente BigQuery
+client = bigquery.Client(credentials=credentials, project='nomadic-mesh-436922-r3')
+
+# Cargar los datos desde BigQuery
 @st.cache_data
-def load_data():
-    return pd.read_csv("Datasets\complete_with_placas.csv")
+def load_data_from_bigquery():
+    query = """
+    SELECT * FROM `nomadic-mesh-436922-r3.BlueTripsNY.Complete_With_Placas`
+    """
+    df = client.query(query).to_dataframe()
+    return df
 
-complete = load_data()
+complete = load_data_from_bigquery()
 
 # Pasar las columnas a formato datetime
 complete['tpep_pickup_datetime'] = pd.to_datetime(complete['tpep_pickup_datetime'])
@@ -28,28 +42,44 @@ X_train, X_test, y_train_costo, y_test_costo = train_test_split(X, y_costo, test
 X_train_tiempo, X_test_tiempo, y_train_tiempo, y_test_tiempo = train_test_split(X, y_tiempo, test_size=0.2, random_state=42)
 
 # Entrenar los modelos
-modelo_costo = LinearRegression().fit(X_train, y_train_costo)
-modelo_tiempo = LinearRegression().fit(X_train_tiempo, y_train_tiempo)
+modelo_costo = DecisionTreeRegressor().fit(X_train, y_train_costo)
+modelo_tiempo = DecisionTreeRegressor().fit(X_train_tiempo, y_train_tiempo)
 
 # Crear el DataFrame de reservas
 reservas = pd.DataFrame(columns=['nombre_cliente', 'apellido_cliente', 'fecha_servicio', 'hora_servicio', 
                                  'aeropuerto_llegada', 'zona_destino', 'num_pasajeros', 'placa', 'confirmacion'])
 
-# Cargar reservas desde un archivo CSV si existe
-try:
-    reservas = pd.read_csv('Datasets\reservas.csv')
-except FileNotFoundError:
-    pass  # Si no existe el archivo, continuar con el DataFrame vacío
-
 # Función para generar un número de confirmación único
 def generar_confirmacion():
     while True:
         confirmacion = random.randint(0, 1000)
-        if confirmacion not in reservas['confirmacion'].values:
+        query = f"SELECT COUNT(*) as total FROM `nomadic-mesh-436922-r3.BlueTripsNY.Reservas` WHERE confirmacion = {confirmacion}"
+        results = client.query(query).to_dataframe()
+        if results['total'][0] == 0:
             return confirmacion
 
+# Función para guardar la reserva en BigQuery
+def guardar_reserva_en_bigquery(reserva):
+    # Convertir las columnas de fecha y hora a cadenas
+    reserva['fecha_servicio'] = reserva['fecha_servicio'].astype(str)
+    reserva['hora_servicio'] = reserva['hora_servicio'].astype(str)
+    
+    # Definir la tabla de destino
+    table_id = 'nomadic-mesh-436922-r3.BlueTripsNY.Reservas'
+    
+    # Convertir el DataFrame de la reserva a un formato adecuado para BigQuery
+    reserva_rows = reserva.to_dict(orient='records')
+    
+    # Cargar los datos en la tabla de BigQuery
+    errors = client.insert_rows_json(table_id, reserva_rows)
+    
+    if errors == []:
+        st.success("Reserva guardada correctamente en BigQuery.")
+    else:
+        st.error(f"Error al guardar la reserva en BigQuery: {errors}")
+
 # Interfaz de usuario
-st.title("Reserva de vehiculos compartidos")
+st.title("Reserva de vehículos compartidos")
 
 nombre_cliente = st.text_input("Ingrese su nombre:")
 apellido_cliente = st.text_input("Ingrese su apellido:")
@@ -64,7 +94,8 @@ aeropuerto_opciones = {
 }
 aeropuerto_llegada = st.selectbox("Seleccione el aeropuerto de llegada:", list(aeropuerto_opciones.keys()))
 
-zona_destino = st.text_input("Ingrese la zona o localidad de destino:")
+zona_destino = st.selectbox("Ingrese la zona o localidad de destino:", complete['Zone'].unique())
+
 num_pasajeros = st.number_input("Ingrese la cantidad de pasajeros (máx 5):", min_value=1, max_value=5)
 
 # Asegurarse de que no haya valores NaN en la columna 'Zone'
@@ -132,18 +163,19 @@ if st.button("Reservar"):
         confirmacion = generar_confirmacion()
 
         # Generar el mensaje final
-        costo_viaje = round(pred_cost[0], 2)
-        tiempo_viaje = round(pred_time[0], 2)
+        costo_viaje = round(pred_cost[0])  # Redondear sin decimales
+        tiempo_viaje = round(pred_time[0])  # Redondear a minutos enteros
 
         mensaje = (f"Hola {nombre_cliente} {apellido_cliente}, ¡Gracias por elegir blue trips! Tu reserva para el día {fecha_servicio} ha sido confirmada. "
-                   f"El taxi con placas {placa_disponible} te podrá recoger a las {hora_servicio} horas. "
+                   f"El vehículo con placas {placa_disponible} te podrá recoger a las {hora_servicio} horas. "
                    f"El costo estimado de tu viaje es de ${costo_viaje} USD, y el tiempo del trayecto es de "
                    f"alrededor de {tiempo_viaje} minutos. Tu número de confirmación es {confirmacion}. "
                    "En unos minutos, el conductor se pondrá en contacto contigo para confirmar los detalles del servicio. ")
-        if num_pasajeros <= 4:
-            mensaje += " Aún hay disponibilidad para más pasajeros si deseas compartir el taxi."
 
-        # Agregar la reserva a la base de datos
+        if num_pasajeros <= 5:
+            st.write(mensaje)
+        
+        # Agregar la reserva a la tabla de reservas
         nueva_reserva = pd.DataFrame({
             'nombre_cliente': [nombre_cliente],
             'apellido_cliente': [apellido_cliente],
@@ -155,17 +187,6 @@ if st.button("Reservar"):
             'placa': [placa_disponible],
             'confirmacion': [confirmacion]
         })
+        
         reservas = pd.concat([reservas, nueva_reserva], ignore_index=True)
-
-        # Guardar reservas en un archivo CSV
-        reservas.to_csv('Datasets\reservas.csv', index=False)
-
-        st.success(mensaje)
-
-
-
-
-
-
-          
-
+        guardar_reserva_en_bigquery(nueva_reserva)
