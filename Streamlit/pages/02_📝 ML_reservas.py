@@ -8,7 +8,7 @@ from google.oauth2 import service_account
 
 # Autenticación con BigQuery
 credentials = service_account.Credentials.from_service_account_file(
-    'C:\\Users\\Juan Pablo\\Desktop\\proyecto final Henry\\nomadic-mesh-436922-r3-e78534bb2f77.json'
+    'https://github.com/UrbanGreenSolutions/BlueTrips/blob/main/Key/nomadic-mesh-436922-r3-e78534bb2f77.json'
 )
 
 # Crear cliente BigQuery

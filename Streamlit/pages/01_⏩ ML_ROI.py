@@ -12,7 +12,7 @@ st.title("Análisis de ROI para vehículos eléctricos compartidos")
 
 # Autenticación con BigQuery
 credentials = service_account.Credentials.from_service_account_file(
-    'C:\\Users\\Juan Pablo\\Desktop\\proyecto final Henry\\nomadic-mesh-436922-r3-e78534bb2f77.json'
+    'https://github.com/UrbanGreenSolutions/BlueTrips/blob/main/Key/nomadic-mesh-436922-r3-e78534bb2f77.json'
 )
 
 # Crear cliente BigQuery
