@@ -3,27 +3,41 @@ import pandas as pd
 import random
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
-from google.cloud import bigquery
-from google.oauth2 import service_account
 
-# Autenticación con BigQuery
-credentials = service_account.Credentials.from_service_account_file(
-    'https://github.com/UrbanGreenSolutions/BlueTrips/blob/main/Key/nomadic-mesh-436922-r3-e78534bb2f77.json'
-)
+import pymysql
+from sqlalchemy import create_engine
+# Variables para la DB
+host = 'bn83gilwrcfotqoazybx-mysql.services.clever-cloud.com'
+user = 'uc0tzjpbwmcv8ro5'
+password = 'LaNI5u2ZjXzafghQRntP'
+db = 'bn83gilwrcfotqoazybx'
 
-# Crear cliente BigQuery
-client = bigquery.Client(credentials=credentials, project='nomadic-mesh-436922-r3')
 
-# Cargar los datos desde BigQuery
+
+# Función para cargar datos desde BigQuery
 @st.cache_data
-def load_data_from_bigquery():
-    query = """
-    SELECT * FROM `nomadic-mesh-436922-r3.BlueTripsNY.Complete_With_Placas`
-    """
-    df = client.query(query).to_dataframe()
+def load_data_from_df_placas():
+    #  Motor de la DB
+    engine = create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db}')
+    consulta_sql = 'SELECT * FROM `data_with_placas`'
+    df = pd.read_sql(consulta_sql, engine)
+    engine.dispose()
     return df
 
-complete = load_data_from_bigquery()
+
+# Función para cargar datos desde BigQuery
+@st.cache_data
+def load_data_from_db_reservas():
+    #  Motor de la DB
+    engine = create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db}')
+    consulta_sql = 'SELECT * FROM `reservas`'
+    df = pd.read_sql(consulta_sql, engine)
+    engine.dispose()
+    return df
+
+
+
+complete = load_data_from_df_placas()
 
 # Pasar las columnas a formato datetime
 complete['tpep_pickup_datetime'] = pd.to_datetime(complete['tpep_pickup_datetime'])
@@ -49,37 +63,21 @@ modelo_tiempo = DecisionTreeRegressor().fit(X_train_tiempo, y_train_tiempo)
 reservas = pd.DataFrame(columns=['nombre_cliente', 'apellido_cliente', 'fecha_servicio', 'hora_servicio', 
                                  'aeropuerto_llegada', 'zona_destino', 'num_pasajeros', 'placa', 'confirmacion'])
 
+# Cargar reservas desde un archivo CSV si existe
+try:
+    reservas = load_data_from_db_reservas()
+except FileNotFoundError:
+    pass  # Si no existe el archivo, continuar con el DataFrame vacío
+
 # Función para generar un número de confirmación único
 def generar_confirmacion():
     while True:
         confirmacion = random.randint(0, 1000)
-        query = f"SELECT COUNT(*) as total FROM `nomadic-mesh-436922-r3.BlueTripsNY.Reservas` WHERE confirmacion = {confirmacion}"
-        results = client.query(query).to_dataframe()
-        if results['total'][0] == 0:
+        if confirmacion not in reservas['confirmacion'].values:
             return confirmacion
 
-# Función para guardar la reserva en BigQuery
-def guardar_reserva_en_bigquery(reserva):
-    # Convertir las columnas de fecha y hora a cadenas
-    reserva['fecha_servicio'] = reserva['fecha_servicio'].astype(str)
-    reserva['hora_servicio'] = reserva['hora_servicio'].astype(str)
-    
-    # Definir la tabla de destino
-    table_id = 'nomadic-mesh-436922-r3.BlueTripsNY.Reservas'
-    
-    # Convertir el DataFrame de la reserva a un formato adecuado para BigQuery
-    reserva_rows = reserva.to_dict(orient='records')
-    
-    # Cargar los datos en la tabla de BigQuery
-    errors = client.insert_rows_json(table_id, reserva_rows)
-    
-    if errors == []:
-        st.success("Reserva guardada correctamente en BigQuery.")
-    else:
-        st.error(f"Error al guardar la reserva en BigQuery: {errors}")
-
 # Interfaz de usuario
-st.title("Reserva de vehículos compartidos")
+st.title("Reserva de vehiculos compartidos")
 
 nombre_cliente = st.text_input("Ingrese su nombre:")
 apellido_cliente = st.text_input("Ingrese su apellido:")
@@ -163,19 +161,18 @@ if st.button("Reservar"):
         confirmacion = generar_confirmacion()
 
         # Generar el mensaje final
-        costo_viaje = round(pred_cost[0])  # Redondear sin decimales
-        tiempo_viaje = round(pred_time[0])  # Redondear a minutos enteros
+        costo_viaje = round(pred_cost[0])
+        tiempo_viaje = round(pred_time[0])
 
         mensaje = (f"Hola {nombre_cliente} {apellido_cliente}, ¡Gracias por elegir blue trips! Tu reserva para el día {fecha_servicio} ha sido confirmada. "
-                   f"El vehículo con placas {placa_disponible} te podrá recoger a las {hora_servicio} horas. "
+                   f"El taxi con placas {placa_disponible} te podrá recoger a las {hora_servicio} horas. "
                    f"El costo estimado de tu viaje es de ${costo_viaje} USD, y el tiempo del trayecto es de "
                    f"alrededor de {tiempo_viaje} minutos. Tu número de confirmación es {confirmacion}. "
                    "En unos minutos, el conductor se pondrá en contacto contigo para confirmar los detalles del servicio. ")
+        if num_pasajeros <= 4:
+            mensaje += " Aún hay disponibilidad para más pasajeros si deseas compartir el taxi."
 
-        if num_pasajeros <= 5:
-            st.write(mensaje)
-        
-        # Agregar la reserva a la tabla de reservas
+        # Agregar la reserva a la base de datos
         nueva_reserva = pd.DataFrame({
             'nombre_cliente': [nombre_cliente],
             'apellido_cliente': [apellido_cliente],
@@ -187,6 +184,32 @@ if st.button("Reservar"):
             'placa': [placa_disponible],
             'confirmacion': [confirmacion]
         })
-        
         reservas = pd.concat([reservas, nueva_reserva], ignore_index=True)
-        guardar_reserva_en_bigquery(nueva_reserva)
+
+        st.write(nueva_reserva)
+
+
+        # Función para guardar datos desde BigQuery
+        @st.cache_data
+        def save_data_from_db_reservas():
+            #  Motor de la DB
+            engine = create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db}')
+            nueva_reserva.to_sql('reservas', engine, if_exists='append', index=False)
+            engine.dispose()
+            # return none
+
+
+        # Guardar reservas en un archivo CSV
+        # reservas.to_csv('reservas.csv', index=False)
+        save_data_from_db_reservas()
+
+
+        st.success(mensaje)
+
+
+
+
+
+
+          
+

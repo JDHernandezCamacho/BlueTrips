@@ -4,31 +4,35 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
-from google.cloud import bigquery
-from google.oauth2 import service_account
+
+from sqlalchemy import create_engine
+
+# Variables para la DB
+host = 'bn83gilwrcfotqoazybx-mysql.services.clever-cloud.com'
+user = 'uc0tzjpbwmcv8ro5'
+password = 'LaNI5u2ZjXzafghQRntP'
+db = 'bn83gilwrcfotqoazybx'
+
+# Tasa de conversión de euros a dólares (puedes actualizar este valor con la tasa del día)
+euro_to_usd = 1.10
+
+
 
 # Configuración inicial de la aplicación
 st.title("Análisis de ROI para vehículos eléctricos compartidos")
 
-# Autenticación con BigQuery
-credentials = service_account.Credentials.from_service_account_file(
-    'https://github.com/UrbanGreenSolutions/BlueTrips/blob/main/Key/nomadic-mesh-436922-r3-e78534bb2f77.json'
-)
-
-# Crear cliente BigQuery
-client = bigquery.Client(credentials=credentials, project='nomadic-mesh-436922-r3')
-
 # Función para cargar datos desde BigQuery
 @st.cache_data
-def load_data_from_bigquery():
-    query = """
-    SELECT * FROM `nomadic-mesh-436922-r3.BlueTripsNY.Complete_With_Cars`
-    """
-    df = client.query(query).to_dataframe()
+def load_data_from_db():
+    #  Motor de la DB
+    engine = create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db}')
+    consulta_sql = 'SELECT * FROM `data_with_cars`'
+    df = pd.read_sql(consulta_sql, engine)
+    engine.dispose()
     return df
 
 # Cargar datos y realizar preprocesamiento
-complete_with_cars = load_data_from_bigquery()
+complete_with_cars = load_data_from_db()
 
 # Eliminar vehículos duplicados por 'Brand', 'Model' y 'Range_Km'
 complete_with_cars = complete_with_cars.drop_duplicates(subset=['Brand', 'Model', 'Range_Km'])
