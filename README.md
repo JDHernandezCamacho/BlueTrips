@@ -1,4 +1,18 @@
+![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=for-the-badge&logo=pandas&logoColor=white)
+![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white)
+![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black)
+![Seaborn](https://img.shields.io/badge/Seaborn-%2370399F.svg?style=for-the-badge&logo=seaborn&logoColor=white)
+![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=ffffff)
+![venv](https://img.shields.io/badge/Virtualenv-venv-%2300FFFF?style=for-the-badge&logo=python)
+![PowerBi](https://img.shields.io/badge/Power_Bi-100000?style=for-the-badge&logo=PowerBi&logoColor=white&labelColor=F7FF13&color=FFF700)
+![PyMySQL](https://img.shields.io/badge/PyMySQL-100000?style=for-the-badge&logo=PowerBi&logoColor=white&labelColor=0DD3FF&color=00D9FF)
+![MySQL](https://img.shields.io/badge/MySQL-100000?style=for-the-badge&logo=MySQL&logoColor=000000&labelColor=5EECFF&color=5EECFF)
+![SQLAlquemy](https://img.shields.io/badge/SQLAlquemy-100000?style=for-the-badge&logo=&logoColor=A78A8A&labelColor=BA9A9A&color=FF759F)
+![StreamLit](https://img.shields.io/badge/streamlit-100000?style=for-the-badge&logo=&logoColor=A78A8A&labelColor=BA9A9A&color=7593FF)
+![MariaDB](https://img.shields.io/badge/maria_db-100000?style=for-the-badge&logo=&logoColor=A78A8A&labelColor=BA9A9A&color=0073FF)
+
 # ``` | ✏️ APP - BlueTrips ✏️ | ✏️ Urban Green Solutions ✏️ | 🟢 Data Scientist 🟢|🔵 Data Engineer 🔵|🟢 Data Analytics 🟢|🔵 Business Intelligence 🔵|🟢 Cloud Arquitect 🟢|🔴 Taxis NY 🔴 | 🚀 Henry 🚀 ```
+
 
 
 <p align=center><img src=https://d31uz8lwfmyn8g.cloudfront.net/Assets/logo-henry-white-lg.png><p>
@@ -10,8 +24,16 @@
 
 # ```🚕🚖 Blue Trips: Revolucionando la Movilidad en Nueva York con Vehículos Eléctricos Compartidos 🚖🚕``` 
 
+## 🔷Ingreso plataforma interactiva Blue Trips
+<div>
+    <div align='center'>
+    <a href="https://bluetrips-digiruzvrwgjk5daajlc9s.streamlit.app/" target="_blank" target="_blank">
+          <img  src="https://img.shields.io/badge/app-100000?style=for-the-badge&logo=&logoColor=A78A8A&labelColor=BA9A9A&color=FF7C00"/>
+       </a>
+    </div>
+</div>
 
-## 🔷Descripción del Proyecto
+# ✔️``Descripción del proyecto``
 Blue Trips es una iniciativa que busca transformar el transporte urbano en Nueva York mediante la introducción de una flota de vehículos eléctricos compartidos. Nuestro enfoque está en ofrecer un servicio innovador, flexible y sostenible que aproveche las ventajas de los vehículos eléctricos, en particular en aeropuertos y zonas con alta demanda de movilidad. Nos proponemos no solo reducir el impacto ambiental, sino también generar una propuesta de valor rentable y alineada con el marco regulatorio de la ciudad.
 
 
@@ -63,7 +85,13 @@ Conocer cual es el camino que siguen los datos dentro de cualquier proyecto es c
 
 ![Barner](/Assets/pipeline.jpg)
 
+## 🔷Comprobación y Validación de Datos en Google Cloud Platform usando Apache Airflow (Composer)
+En este proyecto, implementamos un flujo de trabajo en Google Cloud Composer que automatiza la validación de datos en BigQuery. Utilizamos un DAG de Apache Airflow para realizar verificaciones de calidad y asegurar que los datos cumplan con criterios específicos antes de ser utilizados. Este proceso mejora la precisión y confiabilidad de los datos en el entorno de Google Cloud Platform.
 
+Video:
+[Ver Video en Google Drive](https://drive.google.com/file/d/1RQeC8gPUqPK6zTIH17010yaXU3mOqwtc/view)
+
+Este video muestra cómo configurar un DAG para la validación automática de datos.
 
 # 1. ✔️```Análisis preliminar de la calidad de los datos (EDA)``` 
 
@@ -140,7 +168,9 @@ La base de datos que se construye es muy importante así como su estructura por 
 
 # 3. ✔️```Modelos de Machine Learning``` 
 
-En el proyecto de la nueva unidad de negocio de vehículos compartidos eléctricos, se plantea desarrollar un modelo de machine learning específicamente diseñado para medir el Retorno de Inversión (ROI). Este modelo se enfocará en analizar los ingresos y costos asociados a la operación de la flota de vehículos eléctricos, con el objetivo de ofrecer una evaluación precisa del desempeño financiero del proyecto.
+## 🔷Análisis de ROI para vehículos eléctricos compartidos
+
+Se desarrollo un modelo de machine learning específicamente diseñado para medir el Retorno de Inversión (ROI). Este modelo se enfocará en analizar los ingresos y costos asociados a la operación de la flota de vehículos eléctricos, con el objetivo de ofrecer una evaluación precisa del desempeño financiero del proyecto.
 
 El desarrollo de este modelo implica la recopilación y análisis de datos clave, como los ingresos generados por los servicios de transporte, los costos operativos (mantenimiento de los vehículos, costos de energía eléctrica, infraestructura de carga), así como los costos iniciales de inversión en la flota y otros gastos asociados. Además, se incluirán factores como la demanda estacional del servicio, patrones de uso, zonas con mayor actividad y variables externas que puedan afectar la operación, como cambios en las regulaciones o incentivos fiscales.
 
@@ -148,8 +178,9 @@ La razón principal para implementar este modelo es que permitirá al cliente te
 
 Otro aspecto clave del modelo será su capacidad de realizar proyecciones a futuro. Esto permitirá no solo evaluar el ROI actual, sino también predecir cómo se comportará en distintos escenarios, como la expansión de la flota, el aumento de la demanda, o cambios en las condiciones del mercado. De esta manera, el cliente podrá planificar estratégicamente sus inversiones y ajustar el crecimiento del negocio de manera controlada, maximizando la rentabilidad.
 
+## 🔷Modelo reservas automóviles compartidos.
 
-La implementación del modelo de machine learning en este proyecto busca predecir los costos de los viajes que dos o más usuarios tendrán que pagar, para ello es indispensable la hora de inicio y la hora de finalización del vieje así como la distancia del recorrido. Este modelo permite estimar y predecir como se comportarán los posibles clientes ante la construcción del negocio y de esta forma conocer con un grado de probabilidad que futuro tendrá la unidad de negocio.
+El modelo de Reservas de Autos Compartidos de Blue Trips proporciona a los clientes estimaciones precisas del costo y duración de sus viajes, mejorando la eficiencia operativa y la experiencia del usuario. Utilizamos un modelo de Árboles de Decisión, que permite manejar múltiples variables (como el número de pasajeros, la zona de destino y el vehículo disponible) de manera eficiente y flexible. Esto ayuda a predecir con precisión tanto el costo del viaje como su duración, ofreciendo una solución adaptable y rápida que optimiza el uso de la flota de autos compartidos.
 
 ### ✔️```Resultados```
 ![ML](/Assets/ML01.jpg)
@@ -159,13 +190,13 @@ La implementación del modelo de machine learning en este proyecto busca predeci
 
 # 3.✔️`KPIs` propuestos:
 
-🔷  KPI 1: Incrementar un 1% mensual en el uso de servicios de autos compartidos.
+🔷  KPI 1: Incrementar un 10% mensual en el uso de servicios de autos compartidos.
 Descripción: este KPI permite conocer el comportamiento del uso de autos compartidos del negocio Blue Trips.
 
-🔷  KPI 2: Incrementar un 3% mensual en el total de los ingresos por el servicio de uso de autos compartidos.
+🔷  KPI 2: Incrementar un 5% mensual en el total de los ingresos por el servicio de uso de autos compartidos.
 Descripción: Un factor importante en cualquier tipo de negocio es conocer como se comportan los ingresos, de esta manera se busca realizar adecuaciones y tomar decisiones respecto al valor de este indicador, por lo que analizarlo constantemente ayuda a conocer el estado del negocio.
 
-🔷  KPI 3: Incrementar ganancia de un 20% bimestral respecto a las inversiones en la flota de x vehículos eléctricos por el servicio de transporte en autos compartidos.
+🔷  KPI 3: Incrementar ganancia de un 16.67% bimestral respecto a las inversiones en la flota de x vehículos eléctricos por el servicio de transporte en autos compartidos.
 Descripción: Cualquier negocio necesita tener rendimientos rentables en sus ingresos por lo que para este KPI se pretende conocer como se comportan las ganancias respecto a las inversiones que se realicen.
 
 
@@ -267,8 +298,3 @@ Este dashboard contiene información de vehículos eléctricos como: marca, mode
   </table>
   <table align='center'>
 <tr>
-
-
-
-
-
