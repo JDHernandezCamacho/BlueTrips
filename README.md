@@ -163,7 +163,7 @@ El proceso de ETL es crucial puesto que permitirá alimentar la aplicación de t
 🔷 **Estructura de la DB:**  
 La base de datos que se construye es muy importante así como su estructura por lo que darla a conocer es medular en el proyecto, a continuación se muestra la estructura de esta Base de Datos construida:
 
-![DB](/Assets/Relational-DB.png)
+![DB](/Assets/Relational-DB.jpg)
 
 
 # 3. ✔️```Modelos de Machine Learning``` 
