@@ -24,11 +24,11 @@
 
 # ```🚕🚖 Blue Trips: Revolucionando la Movilidad en Nueva York con Vehículos Eléctricos Compartidos 🚖🚕``` 
 
-## 🔷Ingreso plataforma interactiva Blue Trips
+## 🔷Ingreso plataforma interactiva Blue Trips:
 <div>
     <div align='center'>
     <a href="https://bluetrips-digiruzvrwgjk5daajlc9s.streamlit.app/" target="_blank" target="_blank">
-          <img  src="https://img.shields.io/badge/app-100000?style=for-the-badge&logo=&logoColor=A78A8A&labelColor=BA9A9A&color=FF7C00"/>
+          <img  src="C:\Users\cgabr\OneDrive\Desktop"/>
        </a>
     </div>
 </div>
