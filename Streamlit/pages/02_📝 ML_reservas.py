@@ -2,14 +2,42 @@ import streamlit as st
 import pandas as pd
 import random
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
 
-# Cargar los datos
+import pymysql
+from sqlalchemy import create_engine
+# Variables para la DB
+host = 'byzuegyhogks28kbhbkn-mysql.services.clever-cloud.com'
+user = 'uqpk8ogwqurgzkhh'
+password = 'uXvAxUEyxLSo9dnvub27'
+db = 'byzuegyhogks28kbhbkn'
+
+
+
+# Función para cargar datos desde BigQuery
 @st.cache_data
-def load_data():
-    return pd.read_csv("Datasets\complete_with_placas.csv")
+def load_data_from_df_cars():
+    #  Motor de la DB
+    engine = create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db}')
+    consulta_sql = 'SELECT * FROM `data_with_cars`'
+    df = pd.read_sql(consulta_sql, engine)
+    engine.dispose()
+    return df
 
-complete = load_data()
+
+# Función para cargar datos desde BigQuery
+@st.cache_data
+def load_data_from_db_reservas():
+    #  Motor de la DB
+    engine = create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db}')
+    consulta_sql = 'SELECT * FROM `reservas`'
+    df = pd.read_sql(consulta_sql, engine)
+    engine.dispose()
+    return df
+
+
+
+complete = load_data_from_df_cars()
 
 # Pasar las columnas a formato datetime
 complete['tpep_pickup_datetime'] = pd.to_datetime(complete['tpep_pickup_datetime'])
@@ -28,8 +56,8 @@ X_train, X_test, y_train_costo, y_test_costo = train_test_split(X, y_costo, test
 X_train_tiempo, X_test_tiempo, y_train_tiempo, y_test_tiempo = train_test_split(X, y_tiempo, test_size=0.2, random_state=42)
 
 # Entrenar los modelos
-modelo_costo = LinearRegression().fit(X_train, y_train_costo)
-modelo_tiempo = LinearRegression().fit(X_train_tiempo, y_train_tiempo)
+modelo_costo = DecisionTreeRegressor().fit(X_train, y_train_costo)
+modelo_tiempo = DecisionTreeRegressor().fit(X_train_tiempo, y_train_tiempo)
 
 # Crear el DataFrame de reservas
 reservas = pd.DataFrame(columns=['nombre_cliente', 'apellido_cliente', 'fecha_servicio', 'hora_servicio', 
@@ -37,7 +65,7 @@ reservas = pd.DataFrame(columns=['nombre_cliente', 'apellido_cliente', 'fecha_se
 
 # Cargar reservas desde un archivo CSV si existe
 try:
-    reservas = pd.read_csv('Datasets\reservas.csv')
+    reservas = load_data_from_db_reservas()
 except FileNotFoundError:
     pass  # Si no existe el archivo, continuar con el DataFrame vacío
 
@@ -64,7 +92,8 @@ aeropuerto_opciones = {
 }
 aeropuerto_llegada = st.selectbox("Seleccione el aeropuerto de llegada:", list(aeropuerto_opciones.keys()))
 
-zona_destino = st.text_input("Ingrese la zona o localidad de destino:")
+zona_destino = st.selectbox("Ingrese la zona o localidad de destino:", complete['Zone'].unique())
+
 num_pasajeros = st.number_input("Ingrese la cantidad de pasajeros (máx 5):", min_value=1, max_value=5)
 
 # Asegurarse de que no haya valores NaN en la columna 'Zone'
@@ -132,8 +161,8 @@ if st.button("Reservar"):
         confirmacion = generar_confirmacion()
 
         # Generar el mensaje final
-        costo_viaje = round(pred_cost[0], 2)
-        tiempo_viaje = round(pred_time[0], 2)
+        costo_viaje = round(pred_cost[0])
+        tiempo_viaje = round(pred_time[0])
 
         mensaje = (f"Hola {nombre_cliente} {apellido_cliente}, ¡Gracias por elegir blue trips! Tu reserva para el día {fecha_servicio} ha sido confirmada. "
                    f"El taxi con placas {placa_disponible} te podrá recoger a las {hora_servicio} horas. "
@@ -157,15 +186,22 @@ if st.button("Reservar"):
         })
         reservas = pd.concat([reservas, nueva_reserva], ignore_index=True)
 
+        st.write(nueva_reserva)
+
+
+        # Función para guardar datos desde BigQuery
+        @st.cache_data
+        def save_data_from_db_reservas():
+            #  Motor de la DB
+            engine = create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db}')
+            nueva_reserva.to_sql('reservas', engine, if_exists='append', index=False)
+            engine.dispose()
+            # return none
+
+
         # Guardar reservas en un archivo CSV
-        reservas.to_csv('Datasets\reservas.csv', index=False)
+        # reservas.to_csv('reservas.csv', index=False)
+        save_data_from_db_reservas()
+
 
         st.success(mensaje)
-
-
-
-
-
-
-          
-
