@@ -16,10 +16,10 @@ db = 'byzuegyhogks28kbhbkn'
 
 # Función para cargar datos desde BigQuery
 @st.cache_data
-def load_data_from_df_placas():
+def load_data_from_df_cars():
     #  Motor de la DB
     engine = create_engine(f'mysql+pymysql://{user}:{password}@{host}/{db}')
-    consulta_sql = 'SELECT * FROM `data_with_placas`'
+    consulta_sql = 'SELECT * FROM `data_with_cars`'
     df = pd.read_sql(consulta_sql, engine)
     engine.dispose()
     return df
@@ -37,7 +37,7 @@ def load_data_from_db_reservas():
 
 
 
-complete = load_data_from_df_placas()
+complete = load_data_from_df_cars()
 
 # Pasar las columnas a formato datetime
 complete['tpep_pickup_datetime'] = pd.to_datetime(complete['tpep_pickup_datetime'])
@@ -205,11 +205,3 @@ if st.button("Reservar"):
 
 
         st.success(mensaje)
-
-
-
-
-
-
-          
-
