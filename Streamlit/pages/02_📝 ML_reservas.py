@@ -7,10 +7,10 @@ from sklearn.tree import DecisionTreeRegressor
 import pymysql
 from sqlalchemy import create_engine
 # Variables para la DB
-host = 'bn83gilwrcfotqoazybx-mysql.services.clever-cloud.com'
-user = 'uc0tzjpbwmcv8ro5'
-password = 'LaNI5u2ZjXzafghQRntP'
-db = 'bn83gilwrcfotqoazybx'
+host = 'byzuegyhogks28kbhbkn-mysql.services.clever-cloud.com'
+user = 'uqpk8ogwqurgzkhh'
+password = 'uXvAxUEyxLSo9dnvub27'
+db = 'byzuegyhogks28kbhbkn'
 
 
 
