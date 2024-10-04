@@ -4,24 +4,31 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
-import joblib
+from google.cloud import bigquery
+from google.oauth2 import service_account
 
-
-
-# Tasa de conversión de euros a dólares (puedes actualizar este valor con la tasa del día)
-euro_to_usd = 1.10
-
-# Título de la app
+# Configuración inicial de la aplicación
 st.title("Análisis de ROI para vehículos eléctricos compartidos")
 
+# Autenticación con BigQuery
+credentials = service_account.Credentials.from_service_account_file(
+    'C:\\Users\\Juan Pablo\\Desktop\\proyecto final Henry\\nomadic-mesh-436922-r3-e78534bb2f77.json'
+)
 
-# Cargar el dataset 'complete_with_cars.csv'
+# Crear cliente BigQuery
+client = bigquery.Client(credentials=credentials, project='nomadic-mesh-436922-r3')
+
+# Función para cargar datos desde BigQuery
 @st.cache_data
-def load_data():
-    return pd.read_csv("Datasets\complete_with_cars.csv")
+def load_data_from_bigquery():
+    query = """
+    SELECT * FROM `nomadic-mesh-436922-r3.BlueTripsNY.Complete_With_Cars`
+    """
+    df = client.query(query).to_dataframe()
+    return df
 
-
-complete_with_cars = load_data() 
+# Cargar datos y realizar preprocesamiento
+complete_with_cars = load_data_from_bigquery()
 
 # Eliminar vehículos duplicados por 'Brand', 'Model' y 'Range_Km'
 complete_with_cars = complete_with_cars.drop_duplicates(subset=['Brand', 'Model', 'Range_Km'])
@@ -29,103 +36,97 @@ complete_with_cars = complete_with_cars.drop_duplicates(subset=['Brand', 'Model'
 # Convertir la distancia de millas a kilómetros
 complete_with_cars['trip_distance_km'] = complete_with_cars['trip_distance'] * 1.60934
 
-# Crear una columna para la eficiencia (consumo energético) en Wh/km
+# Crear columna de eficiencia energética (Wh/km)
 complete_with_cars['energy_consumed_kwh'] = (complete_with_cars['trip_distance_km'] * complete_with_cars['Efficiency_WhKm']) / 1000
 
-# Asignar un costo promedio por kWh en USD
-electricity_cost_per_kwh = 0.13 * euro_to_usd  # Convertir a dólares
+# Definir tasa de conversión euro a dólar y costo de electricidad en USD
+euro_to_usd = 1.10
+electricity_cost_per_kwh = 0.13 * euro_to_usd
 
-# Calcular el costo mensual de carga eléctrica (suponiendo 2000 km recorridos al mes)
+# Cálculo de costo mensual de carga eléctrica
 average_km_per_month = 2000
 complete_with_cars['monthly_charge_cost'] = (average_km_per_month * complete_with_cars['Efficiency_WhKm'] / 1000) * electricity_cost_per_kwh
 
-# Crear columnas de ingresos y costos mensuales en USD
-complete_with_cars['monthly_revenue'] = 3000 * euro_to_usd  # Ingresos mensuales estimados (convertidos a dólares)
-complete_with_cars['total_monthly_cost'] = complete_with_cars['monthly_charge_cost'] + 500 * euro_to_usd  # Costos operativos estimados (en dólares)
-
-# Calcular la ganancia neta mensual
+# Ingresos y costos mensuales
+complete_with_cars['monthly_revenue'] = 3000 * euro_to_usd
+complete_with_cars['total_monthly_cost'] = complete_with_cars['monthly_charge_cost'] + 500 * euro_to_usd
 complete_with_cars['net_monthly_profit'] = complete_with_cars['monthly_revenue'] - complete_with_cars['total_monthly_cost']
 
-# Limpiar los valores no numéricos
-complete_with_cars.replace('-', np.nan, inplace=True)
+# Limpiar valores no numéricos
+columns_to_convert = ['Range_Km', 'PriceEuro', 'Efficiency_WhKm', 'Seats', 'TopSpeed_KmH', 'FastCharge_KmH']
+for col in columns_to_convert:
+    complete_with_cars[col] = pd.to_numeric(complete_with_cars[col], errors='coerce')
 
-# Verificar y eliminar valores faltantes en las columnas predictoras
-complete_with_cars.dropna(subset=['Range_Km', 'PriceEuro', 'Efficiency_WhKm', 'Seats', 'TopSpeed_KmH', 'FastCharge_KmH', 'PowerTrain'], inplace=True)
+# Eliminar filas con valores faltantes
+complete_with_cars.dropna(subset=columns_to_convert + ['PowerTrain'], inplace=True)
 
-# Convertir la columna 'PowerTrain' a variables dummy
+# Convertir columna 'PowerTrain' a variables dummy
 complete_with_cars = pd.get_dummies(complete_with_cars, columns=['PowerTrain'], drop_first=True)
 
-# Definir las variables predictoras (features) y la variable objetivo (target)
-X = complete_with_cars[['Range_Km', 'PriceEuro', 'Efficiency_WhKm', 'Seats', 'TopSpeed_KmH', 'FastCharge_KmH'] + [col for col in complete_with_cars.columns if 'PowerTrain_' in col]]
-y = complete_with_cars['net_monthly_profit']  # Nuestro target será la ganancia neta mensual
+# Definir variables predictoras (X) y objetivo (y)
+X = complete_with_cars[['Range_Km', 'PriceEuro', 'Efficiency_WhKm', 'Seats', 'TopSpeed_KmH', 'FastCharge_KmH'] + 
+                       [col for col in complete_with_cars.columns if 'PowerTrain_' in col]]
+y = complete_with_cars['net_monthly_profit']
 
 # Dividir el dataset en conjunto de entrenamiento y prueba
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Crear y entrenar el modelo de regresión lineal
+# Crear y entrenar modelos
 linear_model = LinearRegression()
 linear_model.fit(X_train, y_train)
 
-# Crear y entrenar un modelo RandomForestRegressor como alternativa
 rf_model = RandomForestRegressor(random_state=42)
 rf_model.fit(X_train, y_train)
 
-# Evaluar el modelo
+# Evaluar modelos
 linear_model_score = linear_model.score(X_test, y_test)
 rf_model_score = rf_model.score(X_test, y_test)
 
-# Solicitar el número de vehículos al usuario
+
+# Solicitar número de vehículos al usuario
 num_vehicles = st.number_input("¿Cuántos vehículos desea invertir?", min_value=1, step=1, value=1)
 
-# Seleccionar los vehículos con mayor autonomía
+# Seleccionar vehículos con mayor autonomía
 top_5_vehicles = complete_with_cars.nlargest(5, 'Range_Km')[['Brand', 'Model', 'Range_Km', 'PriceEuro', 'Efficiency_WhKm']]
-
-# Convertir precios de euros a dólares para los vehículos
 top_5_vehicles['PriceUSD'] = top_5_vehicles['PriceEuro'] * euro_to_usd
 
-# Crear lista de opciones para la lista desplegable
+# Crear opciones de vehículos
 vehicle_options = [f"{vehicle.Brand} {vehicle.Model} - Autonomía: {vehicle.Range_Km} km, Precio: ${vehicle.PriceUSD:.2f}" for vehicle in top_5_vehicles.itertuples()]
 
-# Solicitar al usuario que seleccione un vehículo de la lista desplegable
+# Selección de vehículo
 selected_vehicle_option = st.selectbox("Seleccione el vehículo que desea:", vehicle_options)
-
-# Obtener el índice del vehículo seleccionado
 selected_vehicle_index = vehicle_options.index(selected_vehicle_option)
 selected_vehicle = top_5_vehicles.iloc[selected_vehicle_index]
 
-# Calcular el consumo mensual del vehículo seleccionado
-energy_consumed_per_month = (average_km_per_month * selected_vehicle['Efficiency_WhKm']) / 1000  # Convertir Wh a kWh
+# Calcular costos operativos y ganancia neta proyectada
+energy_consumed_per_month = (average_km_per_month * selected_vehicle['Efficiency_WhKm']) / 1000
 monthly_charge_cost = energy_consumed_per_month * electricity_cost_per_kwh
+maintenance_cost_per_year = 500 * euro_to_usd
+tlc_license = 252 / 36
+insurance = 4500 / 12
+inspection = 180 / 12
+dmv_registration = 100 / 12
 
-# Cálculo de costos
-maintenance_cost_per_year = 500 * euro_to_usd  # Convertido a dólares
-tlc_license = 252 / 36  # Licencia TLC mensual (ya en USD)
-insurance = 4500 / 12  # Seguro comercial mensual (ya en USD)
-inspection = 180 / 12  # Inspección TLC mensual (ya en USD)
-dmv_registration = 100 / 12  # Registro DMV mensual (ya en USD)
-
-# Costo total mensual de operación
 total_monthly_costs = (monthly_charge_cost + (maintenance_cost_per_year / 12) +
                        tlc_license + insurance + inspection + dmv_registration)
 
-# Calcular la ganancia neta mensual con el modelo de ML
-vehicle_features = np.array([[selected_vehicle['Range_Km'], selected_vehicle['PriceEuro'], selected_vehicle['Efficiency_WhKm'], 5] + [0]*(X_train.shape[1]-4)])  # Ajustamos las características
-predicted_net_profit = linear_model.predict(vehicle_features)[0] * euro_to_usd  # Convertir el resultado a dólares
+vehicle_features = np.array([[selected_vehicle['Range_Km'], selected_vehicle['PriceEuro'], selected_vehicle['Efficiency_WhKm'], 5] + [0]*(X_train.shape[1]-4)])
+predicted_net_profit = linear_model.predict(vehicle_features)[0] * euro_to_usd
 
-# Cálculo de la inversión inicial en la flota de vehículos
+# Cálculo de inversión inicial, ROI y Payback Period
 total_rebate = 1788.36 * num_vehicles * euro_to_usd
 total_tax_credit = 6706.35 * num_vehicles * euro_to_usd
 vehicle_costs = selected_vehicle['PriceUSD'] * num_vehicles - total_rebate - total_tax_credit
-
-# Cálculo del ROI y Payback Period
 net_monthly_profit_total = predicted_net_profit * num_vehicles
+
 if net_monthly_profit_total > 0:
     payback_period_months = vehicle_costs / net_monthly_profit_total
 else:
-    payback_period_months = float('inf')  # Si la ganancia es negativa, no es posible recuperar la inversión
+    payback_period_months = float('inf')
 
-# Calcular el ROI
 roi_percentage = (net_monthly_profit_total / vehicle_costs) * 100
+
+# Mostrar resultados al usuario
 
 # Mensaje final con la estructura solicitada
 st.write(f"**Estimado usuario,**")
