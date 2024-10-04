@@ -4,19 +4,31 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
+from google.cloud import bigquery
+from google.oauth2 import service_account
 
-# Tasa de conversión de euros a dólares (puedes actualizar este valor con la tasa del día)
-euro_to_usd = 1.10
-
-# Título de la app
+# Configuración inicial de la aplicación
 st.title("Análisis de ROI para vehículos eléctricos compartidos")
 
-# Cargar el dataset 'complete_with_cars.csv'
-@st.cache_data
-def load_data():
-    return pd.read_csv("Datasets\complete_with_cars.csv")
+# Autenticación con BigQuery
+credentials = service_account.Credentials.from_service_account_file(
+    'C:\\Users\\Juan Pablo\\Desktop\\proyecto final Henry\\nomadic-mesh-436922-r3-e78534bb2f77.json'
+)
 
-complete_with_cars = load_data() 
+# Crear cliente BigQuery
+client = bigquery.Client(credentials=credentials, project='nomadic-mesh-436922-r3')
+
+# Función para cargar datos desde BigQuery
+@st.cache_data
+def load_data_from_bigquery():
+    query = """
+    SELECT * FROM `nomadic-mesh-436922-r3.BlueTripsNY.Complete_With_Cars`
+    """
+    df = client.query(query).to_dataframe()
+    return df
+
+# Cargar datos y realizar preprocesamiento
+complete_with_cars = load_data_from_bigquery()
 
 # Eliminar vehículos duplicados por 'Brand', 'Model' y 'Range_Km'
 complete_with_cars = complete_with_cars.drop_duplicates(subset=['Brand', 'Model', 'Range_Km'])
